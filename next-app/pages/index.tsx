@@ -9,9 +9,9 @@ const Home: NextPage = () => {
 
   <input type="text" placeholder="Användarnamn" required></input>
   <input type="password" placeholder="Lösenord" required></input>
-    <button>Logga in</button>
+    <button className='logIn'>Logga in</button>
 
-  <button>Registrera ny användare</button>
+  <button className='register'>Registrera ny användare</button>
 
 
 
