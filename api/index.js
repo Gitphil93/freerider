@@ -4,6 +4,7 @@ const app = express();
 const mysql = require('mysql');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
+require('dotenv').config();
 
 const DB_HOST = process.env.DB_HOST;
 const DB_USER = process.env.DB_USER;
@@ -21,8 +22,16 @@ const db = mysql.createPool({
     password: DB_PASSWORD,
     port: DB_PORT,
     database: DB_DATABASE,
-    port: DB_PORT,
   });
+
+app.post("/api/createuser", (req, res) => {
+    console.log("Hej");
+   return res.sendStatus(200);
+
+}
+);
+
+
 
 app.listen(port, (err) => {
 if (err) {
