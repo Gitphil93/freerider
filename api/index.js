@@ -6,6 +6,8 @@ const bcrypt = require('bcrypt');
 const cors = require('cors');
 require('dotenv').config();
 
+app.use(express.json());
+
 const DB_HOST = process.env.DB_HOST;
 const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
@@ -24,8 +26,18 @@ const db = mysql.createPool({
     database: DB_DATABASE,
   });
 
+
+
+  // 1. Check for empty data
+// 2. Check if user already exists in DB
+// 3. Hash password & Register USER
+// 4. Assign ROLE to USER
+// 5. Get ROLES for USER
+// 6. Set accessToken cookie and return data
+
+
 app.post("/api/createuser", (req, res) => {
-    console.log("Hej");
+    console.log(req.body);
    return res.sendStatus(200);
 
 }
