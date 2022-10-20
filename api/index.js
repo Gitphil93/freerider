@@ -24,11 +24,11 @@ const db = mysql.createPool({
     password: DB_PASSWORD,
     port: DB_PORT,
     database: DB_DATABASE,
-  });
+});
 
-  const whitelist = ['http://localhost:3000'];
+const whitelist = ['http://localhost:3000'];
 
-  app.use(cors({credentials: true, origin: whitelist}));
+app.use(cors({ credentials: true, origin: whitelist }));
 
 
 
@@ -39,40 +39,69 @@ const db = mysql.createPool({
 // 6. Set accessToken cookie and return data
 
 
+//Denna funktionen gör att vi kan logga in när användare är reggat. 
+app.post("/api/login", (req, res) => {
+    console.log(req.body);
+    //1. check for empty data
+    const email = req.body.email;
+    const password = req.body.password;
+
+    console.log(email, password)
+    try {
+        db.query(`SELECT * FROM Users WHERE email="${email}"`, //Hämta all info från användare med våran email
+        (err, result) => {
+            if (err) {
+                res.status(404).json(err)
+                console.log("error getting user from db", err)
+                return
+            } else {
+                res.status(200).json(result) //result från ovan skickas till frontend
+                console.log("Logged in");
+            }
+        })
+
+    } catch(err){
+        console.log("asd asd asd", err)
+    }
+});
+
+//denna funktionen gör att vi kan skapa användare för att sen logga in. 
 app.post("/api/createuser", (req, res) => {
     console.log(req.body);
     //1. check for empty data
     const email = req.body.email;
     const password = req.body.password;
-    
+
     console.log(email, password)
-   try {
-    db.query(`INSERT INTO Users (email, password) VALUES ("${email}", "${password}")`,
-    (err, result) => {
-        if (err) {
-            res.sendStatus(404)
-            return
-        }
-        res.sendStatus(200)
-        console.log("created user");
-    })
-   }
-   catch(err) {
-    console.log(err)
-    res.sendStatus(404)
-   }
+    try {
+        db.query(`INSERT INTO Users (email, password) VALUES ("${email}", "${password}")`,
+            (err, result) => {
+                if (err) {
+                    res.sendStatus(404)
+                    return
+                }
+                res.sendStatus(200)
+                console.log("created user");
+            })
+    }
+    catch (err) {
+        console.log(err)
+        res.sendStatus(404)
+    }
 });
 
 
 
 app.listen(port, (err) => {
-if (err) {
-    console.log("error listen to port", err);
-} else { 
-    console.log("listening to port 4000");
+    if (err) {
+        console.log("error listen to port", err);
+    } else {
+        console.log("listening to port 4000");
     }
 })
 
+
+//Test bara denna gör ingenting just nu
 app.get('/api/test', async (req, res) => {
     return res.status(200).json({
         'test': 'testar',
@@ -80,6 +109,6 @@ app.get('/api/test', async (req, res) => {
             name: 'bulle',
             vetInte: '1234'
         }
-    ]
+        ]
     })
 })

@@ -15,22 +15,40 @@ const Home: NextPage = () => {
   //här sparar vi från html inputs, registrera användare. Dessa skrivs ut i inputfälten nedan. 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [passwordRepeat, setPasswordRepeat ] = useState("")
+  const [passwordRepeat, setPasswordRepeat] = useState("")
 
   const router = useRouter()
 
   //loggar in på konto kopplad till button
-  function login() {
+  async function login() {
     console.log("login", email, password)
+    const response = await fetch("http://localhost:4000/api/login", { //hit kommer result från index.js api/login
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: email, password: password
+      })
+    })
+    const data = response.status //från api/login funktion se ovan. 
+    const User = await response.json()
+    console.log(User)
+    console.log(data) //detta kommer från backend index.js 200 eller 404 error
+
+    if (data == 200) {  //Om allt gick bra och inte fick 404/error så är kontot skapat.
+      alert("Du är inloggad!")
+      router.push("/loggedIn")
+    }
   }
 
   //reggar konto kopplad till button
-  async function register () {
+  async function register() {
     console.log("register", email, password, passwordRepeat)
-    if (password == passwordRepeat)  {
+    if (password == passwordRepeat) {
       console.log("godkänt")
       //Här skickar vi ny regg av användare till api/databasen index.js
-     const response = await fetch("http://localhost:4000/api/createuser", {
+      const response = await fetch("http://localhost:4000/api/createuser", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -38,19 +56,18 @@ const Home: NextPage = () => {
         body: JSON.stringify({
           email: email, password: password
         })
-      }) 
+      })
       const data = response.status
       console.log(data) //detta kommer från backend index.js 200 eller 404 error
 
-      if (data == 200){  //Om allt gick bra och inte fick 404/error så är kontot skapat.
+      if (data == 200) {  //Om allt gick bra och inte fick 404/error så är kontot skapat.
         alert("användare skapad, vänligen logga in")
-        router.push("/loggedIn")
       }
 
     } else {
       alert("Lösenord matchade ej varandra")
     }
-  } 
+  }
 
   return <div className={styles.home}>
     <Header />
@@ -66,7 +83,7 @@ const Home: NextPage = () => {
     ) : (
       <>
         <input type="password" placeholder='Upprepa lösenord' required value={passwordRepeat} onChange={e => setPasswordRepeat(e.target.value)}></input>
-        <button className='register' onClick={() => {setIsLogin(true); register()}}>Registrera</button>
+        <button className='register' onClick={() => { setIsLogin(true); register() }}>Registrera</button>
       </>
     )}
   </div>
