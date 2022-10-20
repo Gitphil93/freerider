@@ -10,7 +10,7 @@ const Home: NextPage = () => {
   return <div className={styles.home}>
     <Header />
 
-  <input type="text" placeholder="Användarnamn" required></input>
+  <input type="text" placeholder="Email" required></input>
   <input type="password" placeholder="Lösenord" required></input>
     <button className='logIn'>Logga in</button>
 

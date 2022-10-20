@@ -28,7 +28,7 @@ const db = mysql.createPool({
 
 
 
-  // 1. Check for empty data
+
 // 2. Check if user already exists in DB
 // 3. Hash password & Register USER
 // 4. Assign ROLE to USER
@@ -38,7 +38,24 @@ const db = mysql.createPool({
 
 app.post("/api/createuser", (req, res) => {
     console.log(req.body);
+    //1. check for empty data
+    const email = req.body.email;
+    const password = req.body.password;
+    
+    console.log(email, password)
+   try {
+    db.query(`INSERT INTO Users (email, password) VALUES ("${email}", "${password}")`,
+    (err, result) => {
+        console.log("created user");
+    })
+   } catch (error) {
+    console.log("error", error)
+   }
    return res.sendStatus(200);
+
+   
+
+   
 
 }
 );
