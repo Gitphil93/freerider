@@ -26,6 +26,9 @@ const db = mysql.createPool({
     database: DB_DATABASE,
   });
 
+  const whitelist = ['http://localhost:3000'];
+
+  app.use(cors({credentials: true, origin: whitelist}));
 
 
 
@@ -68,4 +71,15 @@ if (err) {
 } else { 
     console.log("listening to port 4000");
     }
+})
+
+app.get('/api/test', async (req, res) => {
+    return res.status(200).json({
+        'test': 'testar',
+        'recept': [{
+            name: 'bulle',
+            vetInte: '1234'
+        }
+    ]
+    })
 })
