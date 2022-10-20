@@ -17,8 +17,9 @@ const Home: NextPage = () => {
   return <div className={styles.home}>
     <Header />
 
-    
-    <button className='logIn' onClick={() => setIsLogin(true)}>Logga in</button>
+  <input type="text" placeholder="Email" required></input>
+  <input type="password" placeholder="Lösenord" required></input>
+    <button className='logIn'>Logga in</button>
 
     {/* <button className='register' onClick={() => setIsLogin(false)}>Registrera ny användare</button> */}
     <button className='register' onClick={async () => {
