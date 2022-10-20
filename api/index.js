@@ -49,19 +49,19 @@ app.post("/api/createuser", (req, res) => {
    try {
     db.query(`INSERT INTO Users (email, password) VALUES ("${email}", "${password}")`,
     (err, result) => {
+        if (err) {
+            res.sendStatus(404)
+            return
+        }
+        res.sendStatus(200)
         console.log("created user");
     })
-   } catch (error) {
-    console.log("error", error)
    }
-   return res.sendStatus(200);
-
-   
-
-   
-
-}
-);
+   catch(err) {
+    console.log(err)
+    res.sendStatus(404)
+   }
+});
 
 
 
