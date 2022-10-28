@@ -61,20 +61,43 @@ app.post("/api/login", (req, res) => {
         })
 
     } catch(err){
-        console.log("asd asd asd", err)
+        console.log("error", err)
     }
 });
 
 //denna funktionen gör att vi kan skapa användare för att sen logga in. 
-app.post("/api/createuser", (req, res) => {
+app.post("/api/createuser", async (req, res) => {
     console.log(req.body);
     //1. check for empty data
     const email = req.body.email;
     const password = req.body.password;
 
-    console.log(email, password)
+    console.log(email, password) 
+    if (!email ||!password) {
+       return res.sendStatus(400)
+    }
+    
+    new Promise ((resolve, reject)=> {
+        db.query(`SELECT * FROM Users WHERE email="${email}"`, //Hämta all info från användare med våran email
+    (err, result) => {
+        if (err) {
+            reject.status(404).json(err)
+            console.log("error getting user from db", err)
+            return
+        } else {
+            res.status(200).json(result[0]) //result från ovan skickas till frontend
+
+            console.log("Logged in");
+        }
+    })
+    }
+    
+    
+    );
+
     try {
-        db.query(`INSERT INTO Users (email, password) VALUES ("${email}", "${password}")`,
+      const hashedPassword = await bcrypt.hash(password, 10)
+        db.query(`INSERT INTO Users (email, password) VALUES ("${email}", "${hashedPassword}")`,
             (err, result) => {
                 if (err) {
                     res.sendStatus(404)
