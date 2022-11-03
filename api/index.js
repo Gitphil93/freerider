@@ -24,6 +24,7 @@ const db = mysql.createPool({
     password: DB_PASSWORD,
     port: DB_PORT,
     database: DB_DATABASE,
+    multipleStatements: false //blockar hackers från att ställa mer än 1 fråga. Tex kan ej fråga efter en användare och all info om den. 
 });
 
 const whitelist = ['http://localhost:3000'];
@@ -48,7 +49,9 @@ app.post("/api/login", (req, res) => {
 
     console.log(email, password)
     try {
-        db.query(`SELECT * FROM Users WHERE email="${email}"`, //Hämta all info från användare med våran email
+        let sql = "SELECT * FROM Users WHERE email=?;";  //Blockar SQL injection / hämtar endast vald användare med email
+        let query = mysql.format(sql, [email]); 
+        db.query(query, //Hämta all info från användare med våran email
         (err, result) => {
             if (err) {
                 res.status(404).json(err)
@@ -56,7 +59,7 @@ app.post("/api/login", (req, res) => {
                 return
             } else {
                 res.status(200).json(result) //result från ovan skickas till frontend
-                console.log("Logged in");
+                console.log("Logged in"); // här skickar vi med cookie/JWT token! raden ovan
             }
         })
 
