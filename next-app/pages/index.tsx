@@ -23,7 +23,8 @@ const Home: NextPage = () => {
   async function login() {
     console.log("login", email, password)
     const response = await fetch("http://localhost:4000/api/login", { //hit kommer result från index.js api/login
-      method: "POST",
+      method: "POST", 
+      credentials: 'include',
       headers: {
         "Content-Type": "application/json"
       },

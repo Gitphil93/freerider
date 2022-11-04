@@ -6,6 +6,10 @@ const bcrypt = require('bcrypt');
 const cors = require('cors');
 require('dotenv').config();
 
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+const addMinutes = require('./helpers/addMinutes');
+
 app.use(express.json());
 
 const DB_HOST = process.env.DB_HOST;
@@ -29,7 +33,14 @@ const db = mysql.createPool({
 
 const whitelist = ['http://localhost:3000'];
 
+
+//middleware
 app.use(cors({ credentials: true, origin: whitelist }));
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({
+    extended: true
+}));
 
 
 
@@ -40,8 +51,9 @@ app.use(cors({ credentials: true, origin: whitelist }));
 // 6. Set accessToken cookie and return data
 
 
+
 //Denna funktionen gör att vi kan logga in när användare är reggat. 
-app.post("/api/login", (req, res) => {
+app.post("/api/login", async (req, res) => {
     console.log(req.body);
     //1. check for empty data
     const email = req.body.email;
@@ -52,7 +64,7 @@ app.post("/api/login", (req, res) => {
 
     console.log(email, password)
     try {
-        let sql = "SELECT * FROM Users WHERE email=?;";  //Blockar SQL injection / hämtar endast vald användare med email
+        let sql = "SELECT * FROM Users WHERE email=?";  //Blockar SQL injection / hämtar endast vald användare med email
         let query = mysql.format(sql, [email]); 
         db.query(query, //Hämta all info från användare med våran email
         (err, result) => {
@@ -61,7 +73,23 @@ app.post("/api/login", (req, res) => {
                 console.log("error getting user from db", err)
                 return
             } else {
-                res.status(200).json(result) //result från ovan skickas till frontend
+                let token = jwt.sign({  //Här skapar vi JWT token
+                    email: email
+                }, 
+                    process.env.ACCESS_TOKEN_SECRET, 
+                    {
+                        expiresIn: '10m'
+                    }
+                );
+                
+
+               return res.cookie('token', token, {
+                    httpOnly: true, 
+                    secure: true,
+                    sameSite: 'strict',
+                    expires: addMinutes(10)
+                }) 
+                .status(200).json(result) //result från ovan skickas till frontend
                 console.log("Logged in"); // här skickar vi med cookie/JWT token! raden ovan
             }
         })
