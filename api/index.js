@@ -47,6 +47,9 @@ app.post("/api/login", (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
+    //Skapa Admin, lägg in rollerna i cookien
+
+
     console.log(email, password)
     try {
         let sql = "SELECT * FROM Users WHERE email=?;";  //Blockar SQL injection / hämtar endast vald användare med email
