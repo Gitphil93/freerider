@@ -50,6 +50,15 @@ app.use(express.urlencoded({
 // 5. Get ROLES for USER
 // 6. Set accessToken cookie and return data
 
+//admin
+app.post("/api/admin", async (req, res) => {
+    const adminAccount = {
+        role: "admin",
+        email: "admin1337@gmail.com",
+        password: await hashPassword ("Admin1")
+    }
+})
+
 
 
 //Denna funktionen gör att vi kan logga in när användare är reggat. 
