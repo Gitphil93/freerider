@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
     "createDb": "node ./sql/createDb.js",
-    "createTables": "node ./sql/createTables.js"
+    "createTables": "node ./sql/createTables.js",
+    "createMockData": "node ./sql/createMockData.js"
   },
   "keywords": [],
   "author": "",
