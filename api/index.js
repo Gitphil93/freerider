@@ -56,6 +56,8 @@ app.post("/api/admin", async (req, res) => {
         role: "admin",
         email: "admin1337@gmail.com",
         password: await hashPassword ("Admin1")
+
+        
     }
 })
 
@@ -81,7 +83,8 @@ app.post("/api/login", async (req, res) => {
                 res.status(404).json(err)
                 console.log("error getting user from db", err)
                 return
-            } else {
+            } else { 
+                if (result < 0) {
                 let token = jwt.sign({  //Här skapar vi JWT token
                     email: email
                 }, 
@@ -89,6 +92,7 @@ app.post("/api/login", async (req, res) => {
                     {
                         expiresIn: '10m'
                     }
+                
                 );
                 
 
@@ -100,6 +104,9 @@ app.post("/api/login", async (req, res) => {
                 }) 
                 .status(200).json(result) //result från ovan skickas till frontend
                 console.log("Logged in"); // här skickar vi med cookie/JWT token! raden ovan
+            } else {
+                res.status(400).json ({ message: 'Användaren hittades inte'})
+            }
             }
         })
 
