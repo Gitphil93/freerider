@@ -77,6 +77,7 @@ app.post("/api/login", async (req, res) => {
     try {
         let sql = "SELECT * FROM Users WHERE email=?";  //Blockar SQL injection / hämtar endast vald användare med email
         let query = mysql.format(sql, [email]); 
+        console.log(query);
         db.query(query, //Hämta all info från användare med våran email
         (err, result) => {
             if (err) {
@@ -84,7 +85,7 @@ app.post("/api/login", async (req, res) => {
                 console.log("error getting user from db", err)
                 return
             } else { 
-                if (result > 0) {
+                if (result.length > 0) {
                 let token = jwt.sign({  //Här skapar vi JWT token
                     email: email
                 }, 
