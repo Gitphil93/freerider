@@ -84,7 +84,7 @@ app.post("/api/login", async (req, res) => {
                 console.log("error getting user from db", err)
                 return
             } else { 
-                if (result < 0) {
+                if (result > 0) {
                 let token = jwt.sign({  //Här skapar vi JWT token
                     email: email
                 }, 
