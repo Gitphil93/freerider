@@ -17,6 +17,7 @@ const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
 const DB_DATABASE = process.env.DB_DATABASE;
 const DB_PORT = process.env.DB_PORT;
+const SECRET = process.env.ACCESS_TOKEN_SECRET;
 
 
 const port = process.env.PORT;
@@ -61,6 +62,31 @@ app.post("/api/admin", async (req, res) => {
     }
 })
 
+
+//Skyddar routes, man kan inte logga in via URL'en. Hämtas från Frontend 'loggedIn'
+
+app.get('/api/loggedIn', async (request, response) => {
+    console.log('----/API/LOGGEDIN-----');
+    const token = request.cookies.token;
+  
+    let resObj = {
+      loggedIn: false
+    }
+  
+    try {
+      const data = jwt.verify(token, SECRET);
+  
+      console.log(data);
+  
+      if (data) {
+        resObj.loggedIn = true;
+      }
+    } catch (error) {
+      resObj.errorMessage = 'Token expired';
+    }
+  
+    response.json(resObj);
+  });
 
 
 //Denna funktionen gör att vi kan logga in när användare är reggat. 
