@@ -65,7 +65,7 @@ app.post("/api/admin", async (req, res) => {
 
 //Skyddar routes, man kan inte logga in via URL'en. Hämtas från Frontend 'loggedIn'
 
-app.get('/api/loggedIn', async (request, response) => {
+app.get('/api/loggedIn', (request, response) => {
     console.log('----/API/LOGGEDIN-----');
     const token = request.cookies.token;
   
