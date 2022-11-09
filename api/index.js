@@ -164,6 +164,10 @@ app.post("/api/createuser", async (req, res) => {
     }
 });
 
+app.get('/api/logout', (req, res) => {
+    res.clearCookie('token').json ({message: 'logged out'});
+})
+
 
 
 app.listen(port, (err) => {
