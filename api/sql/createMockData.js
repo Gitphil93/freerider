@@ -24,12 +24,14 @@ const pwdHashed = bcrypt.hashSync("password", 10)
 
 db.connect(async (err, connection) => {
     console.log('RUNNING CREATE MOCK DATA SCRIPT');
+    console.log(err);
     
     var userRoles = 'INSERT INTO Roles(roleId, rolename) VALUES(1000, "User"); INSERT INTO Roles(roleId, rolename) VALUES(2000, "Admin"); INSERT INTO Roles(roleId, rolename) VALUES(3000, "SuperAdmin");'
     
     //Detta är som att klicka på blixten i mySql, med detta kan vi skapa våra roller
     db.query(userRoles, async (err) => {
         if (err) {
+          console.log(err);
           process.exit(1);
         }
         console.log('ROLES CREATED!');
@@ -41,6 +43,7 @@ db.connect(async (err, connection) => {
 
     db.query(Users, async (err) => {
         if (err) {
+          console.log(err);
           process.exit(1);
         }
         console.log('USERS CREATED!');
@@ -57,6 +60,15 @@ db.connect(async (err, connection) => {
     INSERT INTO UsersWithRoles (UserId, RoleId) VALUES (3, 2000);
     INSERT INTO UsersWithRoles (UserId, RoleId) VALUES (3, 3000);`
 
+
+    db.query(UsersWithRoles, async (err) => {
+      if (err) {
+        console.log(err);
+        process.exit(1);
+      }
+      console.log('UsersWithRoles CREATED!');
+  })
+ // process.exit(0);
 })
 
 
