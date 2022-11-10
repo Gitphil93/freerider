@@ -80,12 +80,13 @@ app.get('/api/loggedIn', (request, response) => {
   
       if (data) {
         resObj.loggedIn = true;
+        resObj.data = data; //allt som vi har i token skickas tillbaka till frontend 
       }
     } catch (error) {
       resObj.errorMessage = 'Token expired';
     }
   
-    response.json(resObj);
+    response.json(resObj); 
   });
 
 
@@ -101,9 +102,9 @@ app.post("/api/login", async (req, res) => {
 
     console.log(email, password)
     try {
-        let sql = "SELECT * FROM Users WHERE email=?";  //Blockar SQL injection / hämtar endast vald användare med email
-        let query = mysql.format(sql, [email]); 
-        console.log(query);
+        //Blockar SQL injection / hämtar endast vald användare med email
+        let sql = "SELECT * FROM Users WHERE email=?"  
+        let query = mysql.format(sql, [email]);
         db.query(query, //Hämta all info från användare med våran email
         (err, result) => {
             if (err) {
@@ -112,25 +113,42 @@ app.post("/api/login", async (req, res) => {
                 return
             } else { 
                 if (result.length > 0) {
-                let token = jwt.sign({  //Här skapar vi JWT token
-                    email: email
-                }, 
-                    process.env.ACCESS_TOKEN_SECRET, 
-                    {
-                        expiresIn: '10m'
-                    }
-                
-                );
-                
+                    let sql2 = "SELECT rolename FROM UsersWithRoles INNER JOIN Roles ON Roles.roleId=UsersWithRoles.roleId WHERE userId=?"
+                    let query2 = mysql.format(sql2, [result[0].userId])
+                    db.query(query2, (err2, result2) => {
+                        console.log(result2)
+                        if(err2) {
+                            res.status(404).json(err)
+                            console.log("error getting user roles from db", err)
+                            return
+                        }
+                        //Hämtar den usern / rollen som du loggar in med
+                        let roles = [];  
+                        result2.forEach(role => { 
+                            roles.push(role.rolename)
+                        });
+                    
+                        let token = jwt.sign({  //Här skapar vi JWT token
+                            email: email,
+                            roles: roles //spottar ut arrayen roles ovan med roller man loggar in med
+                        }, 
+                            process.env.ACCESS_TOKEN_SECRET, 
+                            {
+                                expiresIn: '10m'
+                            }
+                        
+                        );
+                        
 
-               return res.cookie('token', token, {
-                    httpOnly: true, 
-                    secure: true,
-                    sameSite: 'strict',
-                    expires: addMinutes(10)
-                }) 
-                .status(200).json(result) //result från ovan skickas till frontend
-                console.log("Logged in"); // här skickar vi med cookie/JWT token! raden ovan
+                    return res.cookie('token', token, {
+                            httpOnly: true, 
+                            secure: true,
+                            sameSite: 'strict',
+                            expires: addMinutes(10)
+                        }) 
+                        .status(200).json(result) //result från ovan skickas till frontend
+                        console.log("Logged in"); // här skickar vi med cookie/JWT token! raden ovan
+                    })
             } else {
                 res.status(400).json ({ message: 'Användaren hittades inte'})
             }
@@ -214,5 +232,20 @@ app.get('/api/test', async (req, res) => {
             vetInte: '1234'
         }
         ]
+    })
+})
+
+
+//hämta alla användare superadmin
+
+app.get('/api/getAllUsers', async (req, res) => {
+    let query = 'SELECT * FROM Users'
+    db.query(query, async (err, result) => {
+        if (err) {
+          console.log(err);
+          return
+        }
+        console.log('ALL USERS');
+        res.send(result);
     })
 })
