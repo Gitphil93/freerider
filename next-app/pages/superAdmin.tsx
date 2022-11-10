@@ -14,7 +14,10 @@ const superAdmin: NextPage = () => {
         });
         const data = await response.json();
 
-        setAllUsers(data);
+        if(!data.message){
+            setAllUsers(data);
+        }
+
     }
 
     //blockerar inlogg via URL / kollar så att du är inloggad via token.
@@ -63,7 +66,7 @@ const superAdmin: NextPage = () => {
         <div>
             <h1>Super Admin </h1>
             <ul>
-                {allUsers.map((User) => {
+                {allUsers?.map((User) => {
                     return <li key={User.userId}>
                         <p>{User.userId}</p>
                         <p>{User.email}</p>

@@ -1,4 +1,5 @@
 const express = require('express');
+const { authorization, adminAuthorization, superAdminAuthorization } = require('./middleware/jwtvalidator');
 
 const app = express();
 const mysql = require('mysql');
@@ -52,15 +53,15 @@ app.use(express.urlencoded({
 // 6. Set accessToken cookie and return data
 
 //admin
-app.post("/api/admin", async (req, res) => {
-    const adminAccount = {
-        role: "admin",
-        email: "admin1337@gmail.com",
-        password: await hashPassword("Admin1")
+// app.post("/api/admin", async (req, res) => {
+//     const adminAccount = {
+//         role: "admin",
+//         email: "admin1337@gmail.com",
+//         password: await hashPassword("Admin1")
 
 
-    }
-})
+//     }
+// })
 
 
 //Skyddar routes, man kan inte logga in via URL'en. Hämtas från Frontend 'loggedIn'
@@ -161,7 +162,7 @@ app.post("/api/login", async (req, res) => {
 });
 
 //Ta bort users i superAdmin mode
-app.post('/api/deleteUser', async (req, res) => {
+app.post('/api/deleteUser', superAdminAuthorization, async (req, res) => {
     let userId = req.body.userId; 
     console.log(userId);
     let sql = 'DELETE FROM UsersWithRoles WHERE userId=?'  // tar bort userns roll 
@@ -254,22 +255,12 @@ app.listen(port, (err) => {
 })
 
 
-//Test bara denna gör ingenting just nu
-app.get('/api/test', async (req, res) => {
-    return res.status(200).json({
-        'test': 'testar',
-        'recept': [{
-            name: 'bulle',
-            vetInte: '1234'
-        }
-        ]
-    })
-})
+
 
 
 //hämta alla användare superadmin
 
-app.get('/api/getAllUsers', async (req, res) => {
+app.get('/api/getAllUsers', superAdminAuthorization, async (req, res) => {
     let query = 'SELECT * FROM Users'
     db.query(query, async (err, result) => {
         if (err) {

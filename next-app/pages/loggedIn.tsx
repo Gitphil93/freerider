@@ -43,9 +43,9 @@ const LoggedIn: NextPage = () => {
 
     return <div>
         <header />
-        <h1>You are logged in {User.email}</h1>
+        <h1>You are logged in {User?.email}</h1>
         <button onClick={logout}>Logga ut</button>
-        {User.roles?.includes('SuperAdmin') ? (
+        {User?.roles?.includes('SuperAdmin') ? (
             <Link href={'/superAdmin'}>
                 <a>Super Admin</a>
             </Link>

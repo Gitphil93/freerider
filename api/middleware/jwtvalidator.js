@@ -30,11 +30,10 @@
 // }
 
 const jwt = require('jsonwebtoken');
-const logger = require("../logger");
 
 const authorization = (req, res, next) => {
   if (!req.cookies.token) {
-    logger.debug("Unauthorized, no token");
+    console.log("Unauthorized, no token");
     return res.status(401).json({message: "Unauthorized, no token"});
   }
   
@@ -43,7 +42,7 @@ const authorization = (req, res, next) => {
   const data = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
 
   if (!data) {
-    logger.debug("Unauthorized, token not valid");
+    console.log("Unauthorized, token not valid");
     res.status(403).json({ message: "Unauthorized, token not valid" });
   }
 
@@ -56,7 +55,7 @@ const authorization = (req, res, next) => {
 
 const adminAuthorization = (req, res, next) => {
   if (!req.cookies.token) { 
-    logger.debug("Unauthorized, no token");
+    console.log("Unauthorized, no token");
     return res.status(401).json({message: "Unauthorized, no token"});
   }
   
@@ -65,12 +64,12 @@ const adminAuthorization = (req, res, next) => {
   const data = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
 
   if (!data) {
-    logger.debug("Unauthorized, token not valid");
+    console.log("Unauthorized, token not valid");
     res.status(403).json({ message: "Unauthorized, token not valid" });
   }
 
   if (!data.roles.includes("Admin")) {
-    logger.debug("Unauthorized, not admin");
+    console.log("Unauthorized, not admin");
     res.status(403).json({ message: "Unauthorized, not admin" });
   }
 
@@ -83,7 +82,7 @@ const adminAuthorization = (req, res, next) => {
 
 const superAdminAuthorization = (req, res, next) => {
   if (!req.cookies.token) {
-    logger.debug("Unauthorized, no token");
+    console.log("Unauthorized, no token");
     return res.status(401).json({message: "Unauthorized, no token"});
   }
   
@@ -92,12 +91,12 @@ const superAdminAuthorization = (req, res, next) => {
   const data = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
 
   if (!data) {
-    logger.debug("Unauthorized, token not valid");
+    console.log("Unauthorized, token not valid");
     return res.status(403).json({ message: "Unauthorized, token not valid" });
   }
 
   if (!data.roles.includes("SuperAdmin")) {
-    logger.debug("Unauthorized, not super admin");
+    console.log("Unauthorized, not super admin");
     return res.status(403).json({ message: "Unauthorized not high enough clearence level" });
   }
 
