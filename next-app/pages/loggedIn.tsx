@@ -21,9 +21,9 @@ const LoggedIn: NextPage = () => {
                 credentials: 'include'
             });
             const data = await response.json();
-        
+
             console.log(data);
-        
+
             if (data.loggedIn == false) {
                 Router.push('/')
             }
@@ -34,11 +34,11 @@ const LoggedIn: NextPage = () => {
 
     }, [])
 
-    async function logout()  {
-       const response = await fetch('http://localhost:4000/api/logout', {credentials: 'include'})
-       const data = await response.json();
-       Router.push('/');
-       console.log(data);
+    async function logout() {
+        const response = await fetch('http://localhost:4000/api/logout', { credentials: 'include' })
+        const data = await response.json();
+        Router.push('/');
+        console.log(data);
     }
 
     return <div>
@@ -49,8 +49,8 @@ const LoggedIn: NextPage = () => {
             <Link href={'/superAdmin'}>
                 <a>Super Admin</a>
             </Link>
-        ): ''} 
-        
+        ) : ''}
+
     </div>
 }
 

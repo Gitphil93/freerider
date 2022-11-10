@@ -56,9 +56,9 @@ app.post("/api/admin", async (req, res) => {
     const adminAccount = {
         role: "admin",
         email: "admin1337@gmail.com",
-        password: await hashPassword ("Admin1")
+        password: await hashPassword("Admin1")
 
-        
+
     }
 })
 
@@ -68,26 +68,26 @@ app.post("/api/admin", async (req, res) => {
 app.get('/api/loggedIn', (request, response) => {
     console.log('----/API/LOGGEDIN-----');
     const token = request.cookies.token;
-  
+
     let resObj = {
-      loggedIn: false
+        loggedIn: false
     }
-  
+
     try {
-      const data = jwt.verify(token, SECRET);
-  
-      console.log(data);
-  
-      if (data) {
-        resObj.loggedIn = true;
-        resObj.data = data; //allt som vi har i token skickas tillbaka till frontend 
-      }
+        const data = jwt.verify(token, SECRET);
+
+        console.log(data);
+
+        if (data) {
+            resObj.loggedIn = true;
+            resObj.data = data; //allt som vi har i token skickas tillbaka till frontend 
+        }
     } catch (error) {
-      resObj.errorMessage = 'Token expired';
+        resObj.errorMessage = 'Token expired';
     }
-  
-    response.json(resObj); 
-  });
+
+    response.json(resObj);
+});
 
 
 //Denna funktionen gör att vi kan logga in när användare är reggat. 
@@ -103,62 +103,93 @@ app.post("/api/login", async (req, res) => {
     console.log(email, password)
     try {
         //Blockar SQL injection / hämtar endast vald användare med email
-        let sql = "SELECT * FROM Users WHERE email=?"  
+        let sql = "SELECT * FROM Users WHERE email=?"
         let query = mysql.format(sql, [email]);
         db.query(query, //Hämta all info från användare med våran email
-        (err, result) => {
-            if (err) {
-                res.status(404).json(err)
-                console.log("error getting user from db", err)
-                return
-            } else { 
-                if (result.length > 0) {
-                    let sql2 = "SELECT rolename FROM UsersWithRoles INNER JOIN Roles ON Roles.roleId=UsersWithRoles.roleId WHERE userId=?"
-                    let query2 = mysql.format(sql2, [result[0].userId])
-                    db.query(query2, (err2, result2) => {
-                        console.log(result2)
-                        if(err2) {
-                            res.status(404).json(err)
-                            console.log("error getting user roles from db", err)
-                            return
-                        }
-                        //Hämtar den usern / rollen som du loggar in med
-                        let roles = [];  
-                        result2.forEach(role => { 
-                            roles.push(role.rolename)
-                        });
-                    
-                        let token = jwt.sign({  //Här skapar vi JWT token
-                            email: email,
-                            roles: roles //spottar ut arrayen roles ovan med roller man loggar in med
-                        }, 
-                            process.env.ACCESS_TOKEN_SECRET, 
-                            {
-                                expiresIn: '10m'
+            (err, result) => {
+                if (err) {
+                    res.status(404).json(err)
+                    console.log("error getting user from db", err)
+                    return
+                } else {
+                    if (result.length > 0) {
+                        let sql2 = "SELECT rolename FROM UsersWithRoles INNER JOIN Roles ON Roles.roleId=UsersWithRoles.roleId WHERE userId=?"
+                        let query2 = mysql.format(sql2, [result[0].userId])
+                        db.query(query2, (err2, result2) => {
+                            console.log(result2)
+                            if (err2) {
+                                res.status(404).json(err)
+                                console.log("error getting user roles from db", err)
+                                return
                             }
-                        
-                        );
-                        
+                            //Hämtar den usern / rollen som du loggar in med
+                            let roles = [];
+                            result2.forEach(role => {
+                                roles.push(role.rolename)
+                            });
 
-                    return res.cookie('token', token, {
-                            httpOnly: true, 
-                            secure: true,
-                            sameSite: 'strict',
-                            expires: addMinutes(10)
-                        }) 
-                        .status(200).json(result) //result från ovan skickas till frontend
-                        console.log("Logged in"); // här skickar vi med cookie/JWT token! raden ovan
-                    })
-            } else {
-                res.status(400).json ({ message: 'Användaren hittades inte'})
-            }
-            }
-        })
+                            let token = jwt.sign({  //Här skapar vi JWT token
+                                email: email,
+                                roles: roles //spottar ut arrayen roles ovan med roller man loggar in med
+                            },
+                                process.env.ACCESS_TOKEN_SECRET,
+                                {
+                                    expiresIn: '10m'
+                                }
 
-    } catch(err){
+                            );
+
+
+                            return res.cookie('token', token, {
+                                httpOnly: true,
+                                secure: true,
+                                sameSite: 'strict',
+                                expires: addMinutes(10)
+                            })
+                                .status(200).json(result) //result från ovan skickas till frontend
+                            console.log("Logged in"); // här skickar vi med cookie/JWT token! raden ovan
+                        })
+                    } else {
+                        res.status(400).json({ message: 'Användaren hittades inte' })
+                    }
+                }
+            })
+
+    } catch (err) {
         console.log("error", err)
     }
 });
+
+//Ta bort users i superAdmin mode
+app.post('/api/deleteUser', async (req, res) => {
+    let userId = req.body.userId; 
+    console.log(userId);
+    let sql = 'DELETE FROM UsersWithRoles WHERE userId=?'  // tar bort userns roll 
+    const query = mysql.format(sql, [userId])
+
+    db.query(query, (err, result) => {
+        if (err) {
+            res.status(404).json(err)
+            console.log("Error, cant delete users role", err)
+            return;
+        } else {
+            let sql2 = 'DELETE FROM Users WHERE userId=?'  // tar bort usern helt
+            const query2 = mysql.format(sql2, [userId])
+
+            db.query(query2, (err2, result2) => {
+                if (err2) {
+                    res.status(404).json(err2)
+                    console.log("Error, cant delete users role", err2)
+                    return;
+                } else { res.status(200).json({message: 'DELETED USER'})
+
+                }
+            })
+        }
+    })
+})
+
+
 
 //denna funktionen gör att vi kan skapa användare för att sen logga in. 
 app.post("/api/createuser", async (req, res) => {
@@ -167,31 +198,31 @@ app.post("/api/createuser", async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    console.log(email, password) 
-    if (!email ||!password) {
-       return res.sendStatus(400)
+    console.log(email, password)
+    if (!email || !password) {
+        return res.sendStatus(400)
     }
-    
-    new Promise ((resolve, reject)=> {
-        db.query(`SELECT * FROM Users WHERE email="${email}"`, //Hämta all info från användare med våran email
-    (err, result) => {
-        if (err) {
-            reject.status(404).json(err)
-            console.log("error getting user from db", err)
-            return
-        } else {
-            res.status(200).json(result[0]) //result från ovan skickas till frontend
 
-            console.log("Logged in");
-        }
-    })
+    new Promise((resolve, reject) => {
+        db.query(`SELECT * FROM Users WHERE email="${email}"`, //Hämta all info från användare med våran email
+            (err, result) => {
+                if (err) {
+                    reject.status(404).json(err)
+                    console.log("error getting user from db", err)
+                    return
+                } else {
+                    res.status(200).json(result[0]) //result från ovan skickas till frontend
+
+                    console.log("Logged in");
+                }
+            })
     }
-    
-    
+
+
     );
 
     try {
-      const hashedPassword = await bcrypt.hash(password, 10)
+        const hashedPassword = await bcrypt.hash(password, 10)
         db.query(`INSERT INTO Users (email, password) VALUES ("${email}", "${hashedPassword}")`,
             (err, result) => {
                 if (err) {
@@ -209,7 +240,7 @@ app.post("/api/createuser", async (req, res) => {
 });
 
 app.get('/api/logout', (req, res) => {
-    res.clearCookie('token').json ({message: 'logged out'});
+    res.clearCookie('token').json({ message: 'logged out' });
 })
 
 
@@ -242,8 +273,8 @@ app.get('/api/getAllUsers', async (req, res) => {
     let query = 'SELECT * FROM Users'
     db.query(query, async (err, result) => {
         if (err) {
-          console.log(err);
-          return
+            console.log(err);
+            return
         }
         console.log('ALL USERS');
         res.send(result);
