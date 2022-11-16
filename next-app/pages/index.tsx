@@ -20,7 +20,7 @@ const Home: NextPage = () => {
 
   //loggar in på konto kopplad till button
   async function login() {
-    console.log("login", email, password)
+    console.log("login", email)
     const response = await fetch("http://localhost:4000/api/login", { //hit kommer result från index.js api/login
       method: "POST", 
       credentials: 'include',
@@ -33,8 +33,7 @@ const Home: NextPage = () => {
     })
     const data = response.status //från api/login funktion se ovan. 
     const User = await response.json()
-    console.log(User)
-    console.log(data) //detta kommer från backend index.js 200 eller 404 error
+ //detta kommer från backend index.js 200 eller 404 error
 
     if (data == 200) {  //Om allt gick bra och inte fick 404/error så är kontot skapat.
       alert("Du är inloggad!")
