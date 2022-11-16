@@ -4,7 +4,6 @@ import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import Header from '../Components/Header'
 import { useRef, useState } from 'react'
-import axios from 'axios'
 import { useRouter } from 'next/router'
 
 
@@ -45,11 +44,12 @@ const Home: NextPage = () => {
 
   //reggar konto kopplad till button
   async function register() {
-    console.log("register", email, password, passwordRepeat)
+    
     if (password == passwordRepeat) {
-      console.log("godkänt")
       //Här skickar vi ny regg av användare till api/databasen index.js
-      const response = await fetch("http://localhost:4000/api/createuser", {
+      try {
+
+         const response = await fetch("http://localhost:4000/api/createuser", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -58,14 +58,19 @@ const Home: NextPage = () => {
           email: email, password: password
         })
       })
+      console.log(response) //detta kommer från backend index.js 200 eller 404 error
       const data = response.status
-      console.log(data) //detta kommer från backend index.js 200 eller 404 error
+      
 
       if (data == 200) {  //Om allt gick bra och inte fick 404/error så är kontot skapat.
         alert("användare skapad, vänligen logga in")
       }
-
-    } else {
+      }
+      catch(err) {
+        console.log(err,"fel från klienten")
+        
+      }
+      } else {
       alert("Lösenord matchade ej varandra")
     }
   }

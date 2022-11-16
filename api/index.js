@@ -11,7 +11,7 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const addMinutes = require('./helpers/addMinutes');
 
-app.use(express.json());
+
 
 const DB_HOST = process.env.DB_HOST;
 const DB_USER = process.env.DB_USER;
@@ -106,21 +106,22 @@ app.post("/api/login", async (req, res) => {
         //Blockar SQL injection / hämtar endast vald användare med email
         let sql = "SELECT * FROM Users WHERE email=?"
         let query = mysql.format(sql, [email]);
+        console.log(query);
         db.query(query, //Hämta all info från användare med våran email
             (err, result) => {
                 if (err) {
                     res.status(404).json(err)
                     console.log("error getting user from db", err)
                     return
-                } else {
+                } else { 
                     if (result.length > 0) {
                         let sql2 = "SELECT rolename FROM UsersWithRoles INNER JOIN Roles ON Roles.roleId=UsersWithRoles.roleId WHERE userId=?"
                         let query2 = mysql.format(sql2, [result[0].userId])
                         db.query(query2, (err2, result2) => {
                             console.log(result2)
                             if (err2) {
-                                res.status(404).json(err)
-                                console.log("error getting user roles from db", err)
+                                res.status(404).json(err2)
+                                console.log("error getting user roles from db", err2)
                                 return
                             }
                             //Hämtar den usern / rollen som du loggar in med
@@ -147,7 +148,11 @@ app.post("/api/login", async (req, res) => {
                                 sameSite: 'strict',
                                 expires: addMinutes(10)
                             })
-                                .status(200).json(result) //result från ovan skickas till frontend
+                                .status(200).json({
+                                    result: result,
+                                    roles: roles,
+
+                                }) //result från ovan skickas till frontend
                             console.log("Logged in"); // här skickar vi med cookie/JWT token! raden ovan
                         })
                     } else {
@@ -194,7 +199,9 @@ app.post('/api/deleteUser', superAdminAuthorization, async (req, res) => {
 
 //denna funktionen gör att vi kan skapa användare för att sen logga in. 
 app.post("/api/createuser", async (req, res) => {
-    console.log(req.body);
+    
+    try {
+        console.log(req.body);
     //1. check for empty data
     const email = req.body.email;
     const password = req.body.password;
@@ -202,37 +209,62 @@ app.post("/api/createuser", async (req, res) => {
     console.log(email, password)
     if (!email || !password) {
         return res.sendStatus(400)
-    }
+    }  
 
-    new Promise((resolve, reject) => {
-        db.query(`SELECT * FROM Users WHERE email="${email}"`, //Hämta all info från användare med våran email
+   const myUser = await new Promise((resolve, reject) => {
+        let sql = `SELECT * FROM Users WHERE email=?`
+        let query = mysql.format(sql, [email]);
+        db.query(query, //Hämta all info från användare med våran email
             (err, result) => {
                 if (err) {
-                    reject.status(404).json(err)
                     console.log("error getting user from db", err)
-                    return
+                   return reject(err)
+                   
+                    
                 } else {
-                    res.status(200).json(result[0]) //result från ovan skickas till frontend
+                                 
+                    return resolve(result[0]) 
+                    //result från ovan skickas till frontend
 
-                    console.log("Logged in");
+                
                 }
             })
     }
 
 
     );
-
-    try {
+   ;    console.log(myUser)
+        if (myUser?.email) {
+            
+            return res.sendStatus(400);
+        }
         const hashedPassword = await bcrypt.hash(password, 10)
-        db.query(`INSERT INTO Users (email, password) VALUES ("${email}", "${hashedPassword}")`,
+      const userId = await new Promise((resolve, reject) => {
+            db.query(`INSERT INTO Users (email, password) VALUES ("${email}", "${hashedPassword}")`,
             (err, result) => {
                 if (err) {
-                    res.sendStatus(404)
-                    return
+                    
+                    return reject(err)
                 }
-                res.sendStatus(200)
                 console.log("created user");
+               return resolve(result.insertId)
+                
             })
+
+        })
+
+        await new Promise((resolve, reject) => {
+            const sql = 'INSERT INTO UsersWithRoles (userId, roleId) VALUES (?, ?)';
+            const query = mysql.format(sql, [userId, 1000]);
+            db.query(query, (err, result) => {
+              if (err) {
+                return reject(err);
+              }
+              return resolve(result);
+            });
+          });
+        return res.sendStatus(200);
+        
     }
     catch (err) {
         console.log(err)
@@ -242,6 +274,7 @@ app.post("/api/createuser", async (req, res) => {
 
 app.get('/api/logout', (req, res) => {
     res.clearCookie('token').json({ message: 'logged out' });
+    res.end();
 })
 
 
@@ -268,6 +301,6 @@ app.get('/api/getAllUsers', superAdminAuthorization, async (req, res) => {
             return
         }
         console.log('ALL USERS');
-        res.send(result);
+        res.status(200).json(result);
     })
 })
