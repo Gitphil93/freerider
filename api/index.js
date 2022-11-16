@@ -149,7 +149,7 @@ app.post("/api/login", async (req, res) => {
                                 expires: addMinutes(10)
                             })
                                 .status(200).json({
-                                    result: result,
+                                    email: result[0].email,  //Detta gör att man inte skickar med lösenord till konsolen när man loggar in
                                     roles: roles,
 
                                 }) //result från ovan skickas till frontend
