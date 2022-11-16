@@ -21,7 +21,7 @@ db.connect(async (err, connection) => {
     console.log(err)
     process.exit(1);
   }
-  console.log('Connected!!');
+  console.log('Connected!');
   db.query(
     `CREATE DATABASE IF NOT EXISTS ${DB_DATABASE}`,
     async (err, result) => {

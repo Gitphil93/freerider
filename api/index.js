@@ -98,10 +98,7 @@ app.post("/api/login", async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    //Skapa Admin, lägg in rollerna i cookien
-
-
-    console.log(email, password)
+    console.log(email)
     try {
         //Blockar SQL injection / hämtar endast vald användare med email
         let sql = "SELECT * FROM Users WHERE email=?"
@@ -206,7 +203,7 @@ app.post("/api/createuser", async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    console.log(email, password)
+
     if (!email || !password) {
         return res.sendStatus(400)
     }  
@@ -233,7 +230,7 @@ app.post("/api/createuser", async (req, res) => {
 
 
     );
-   ;    console.log(myUser)
+       console.log(myUser)
         if (myUser?.email) {
             
             return res.sendStatus(400);
@@ -263,10 +260,31 @@ app.post("/api/createuser", async (req, res) => {
               return resolve(result);
             });
           });
+
+          /* await new Promise((resolve, reject) => {
+            const sql = 'INSERT INTO UsersWithRoles (userId, roleId) VALUES (?, ?)';
+            const query = mysql.format(sql, [userId, 2000]);
+            db.query(query, (err, result) => {
+              if (err) {
+                return reject(err);
+              }
+              return resolve(result);
+            });
+          });
+
+          await new Promise((resolve, reject) => {
+            const sql = 'INSERT INTO UsersWithRoles (userId, roleId) VALUES (?, ?)';
+            const query = mysql.format(sql, [userId, 3000]);
+            db.query(query, (err, result) => {
+              if (err) {
+                return reject(err);
+              }
+              return resolve(result);
+            });
+          }); */
         return res.sendStatus(200);
         
-    }
-    catch (err) {
+    } catch (err) {
         console.log(err)
         res.sendStatus(404)
     }

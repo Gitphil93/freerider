@@ -55,7 +55,7 @@ const LoggedIn: NextPage = () => {
         <button onClick={logout}>Logga ut</button>
         {User != null && User.roles.includes("SuperAdmin") ? (
             <Link href={'/superAdmin'}>
-                <a>Super Admin</a>
+                <a>  Super Admin</a>
             </Link>
         ) : ''}
 
