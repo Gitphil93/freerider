@@ -33,5 +33,3 @@ const Admin: NextPage = () => {
 };
     
 export default Admin;
-
-

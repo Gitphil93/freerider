@@ -2,11 +2,17 @@ import Router from 'next/router'
 import type { NextPage } from 'next'
 import { useEffect } from 'react'
 import { useRef, useState } from 'react'
+import { stringify } from 'querystring'
 
 
-const superAdmin: NextPage = () => {
+type User = {
+    userId: number,
+    email: string,
+  }
 
-    const [allUsers, setAllUsers] = useState<Array<object>>([])
+const SuperAdmin: NextPage = () => {
+
+    const [allUsers, setAllUsers] = useState<User[]>([])
 
     async function getAllUsers() {
         const response = await fetch('http://localhost:4000/api/getAllUsers', {
@@ -83,4 +89,4 @@ const superAdmin: NextPage = () => {
 
 
 
-export default superAdmin;
+export default SuperAdmin;

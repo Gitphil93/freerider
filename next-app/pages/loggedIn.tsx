@@ -63,4 +63,3 @@ const LoggedIn: NextPage = () => {
 }
 
 export default LoggedIn
-

@@ -112,6 +112,14 @@ app.post("/api/login", async (req, res) => {
                     return
                 } else { 
                     if (result.length > 0) {
+                            const compare = bcrypt.compareSync(password, result[0].password);
+                            console.log(compare);
+                            if (!compare) {
+                                res.status(404).json ({message: "fel lösenord"})
+                                console.log("compared")
+                                return
+                            }
+
                         let sql2 = "SELECT rolename FROM UsersWithRoles INNER JOIN Roles ON Roles.roleId=UsersWithRoles.roleId WHERE userId=?"
                         let query2 = mysql.format(sql2, [result[0].userId])
                         db.query(query2, (err2, result2) => {
@@ -237,7 +245,9 @@ app.post("/api/createuser", async (req, res) => {
         }
         const hashedPassword = await bcrypt.hash(password, 10)
       const userId = await new Promise((resolve, reject) => {
-            db.query(`INSERT INTO Users (email, password) VALUES ("${email}", "${hashedPassword}")`,
+            const sql = `INSERT INTO Users (email, password) VALUES (?, ?)`;
+            const query = mysql.format(sql, [email, hashedPassword]);
+            db.query(query,
             (err, result) => {
                 if (err) {
                     
@@ -271,7 +281,6 @@ app.post("/api/createuser", async (req, res) => {
               return resolve(result);
             });
           });
-
           await new Promise((resolve, reject) => {
             const sql = 'INSERT INTO UsersWithRoles (userId, roleId) VALUES (?, ?)';
             const query = mysql.format(sql, [userId, 3000]);
