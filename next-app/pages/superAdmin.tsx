@@ -6,8 +6,8 @@ import { stringify } from 'querystring'
 
 
 type User = {
-    userId: number,
-    email: string,
+    userId: number;
+    email: string;
   }
 
 const SuperAdmin: NextPage = () => {
